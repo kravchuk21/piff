@@ -121,7 +121,7 @@ SUBCOMMANDS = {
             ),
         "help":  Subcommand(
             run = help_subcommand,
-            signature = "",
+            signature = "[subcommand]",
             description = "print this help",
             ),
         }
@@ -129,8 +129,12 @@ SUBCOMMANDS = {
 def usage(program):
     print(f"Usage: {program} <SUBCOMMAND> [OPTIONS]")
     print(f"Subcommands:")
+    width = max([len(f'{name} {subcmd.signature}')
+                     for (name, subcmd) in SUBCOMMANDS.items()])
+
     for (name, subcmd) in SUBCOMMANDS.items():
-        print(f"    {name} {subcmd.signature}   {subcmd.description}")
+        command = f'{name} {subcmd.signature}'.ljust(width)
+        print(f'    {command}   {subcmd.description}')
 
 if __name__ == "__main__":
     assert len(sys.argv) > 0
