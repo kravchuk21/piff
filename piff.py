@@ -79,10 +79,10 @@ def edit_distance(s1, s2):
             assert False, "Unreachable"
     patch.reverse()
 
-def diff_subcommand(args):
+def diff_subcommand(program, args):
     if len(args) < 2:
-        print(f"Usage: {program} {subcommand} <file1> <file2>")
-        print(f"ERROR: no files to compare were provided for {subcommand} subcommand")
+        print(f"Usage: {program} diff <file1> <file2>")
+        print(f"ERROR: no files to compare were provided for diff subcommand")
         exit(1)
 
     file_path1, file_path2, *args = args
@@ -96,11 +96,22 @@ def diff_subcommand(args):
 
     # trace_tables(distances, actions)
 
-def patch_subcommand(args):
+def patch_subcommand(program, args):
     assert False, "Not implemented"
 
-def help_subcommand(args):
-    assert False, "Not implemented"
+def help_subcommand(program, args):
+    if len(args) == 0:
+        usage(program)
+        exit(0)
+    subcommand, *args = args
+
+    if subcommand not in SUBCOMMANDS:
+        usage(program)
+        print(f"ERROR: unknown subcommand {subcommand}")
+        exit(1)
+
+    print(f"Usage: {subcommand} {SUBCOMMANDS[subcommand].signature}")
+    print(f"    {SUBCOMMANDS[subcommand].description}")
 
 class Subcommand:
     def __init__(self, run, signature, description):
@@ -136,7 +147,7 @@ def usage(program):
         command = f'{name} {subcmd.signature}'.ljust(width)
         print(f'    {command}   {subcmd.description}')
 
-if __name__ == "__main__":
+def main():
     assert len(sys.argv) > 0
     program, *args = sys.argv
 
@@ -152,4 +163,7 @@ if __name__ == "__main__":
         print(f"ERROR: unknown subcommand {subcommand}")
         exit(1)
 
-    SUBCOMMANDS[subcommand].run(args)
+    SUBCOMMANDS[subcommand].run(program, args)
+
+if __name__ == "__main__":
+    main()
