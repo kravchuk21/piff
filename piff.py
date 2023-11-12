@@ -99,11 +99,38 @@ def diff_subcommand(args):
 def patch_subcommand(args):
     assert False, "Not implemented"
 
+def help_subcommand(args):
+    assert False, "Not implemented"
+
+class Subcommand:
+    def __init__(self, run, signature, description):
+        self.run = run
+        self.signature = signature
+        self.description = description
+
+SUBCOMMANDS = {
+        "diff": Subcommand(
+            run = diff_subcommand,
+            signature = "<file1> <file2>",
+            description = "print the difference between the files to stdout",
+            ),
+        "patch": Subcommand(
+            run = patch_subcommand,
+            signature = "<file> <file.patch>",
+            description = "patch the file with the given patch",
+            ),
+        "help":  Subcommand(
+            run = help_subcommand,
+            signature = "",
+            description = "print this help",
+            ),
+        }
+
 def usage(program):
     print(f"Usage: {program} <SUBCOMMAND> [OPTIONS]")
     print(f"Subcommands:")
-    print(f"    diff <file1> <file2>          print the difference between the files to stdout")
-    print(f"    patch <file1> <file2>         patch the file with the given patch")
+    for (name, subcmd) in SUBCOMMANDS.items():
+        print(f"    {name} {subcmd.signature}   {subcmd.description}")
 
 if __name__ == "__main__":
     assert len(sys.argv) > 0
@@ -116,11 +143,9 @@ if __name__ == "__main__":
 
     subcommand, *args = args
 
-    if subcommand == "diff":
-        diff_subcommand(args)
-    elif subcommand == "patch":
-        patch_subcommand(args)
-    else:
+    if subcommand not in SUBCOMMANDS:
         usage(program)
         print(f"ERROR: unknown subcommand {subcommand}")
         exit(1)
+
+    SUBCOMMANDS[subcommand].run(args)
