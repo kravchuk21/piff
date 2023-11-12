@@ -19,14 +19,15 @@ def trace_tables(cache, actions):
         print()
     print()
 
-if __name__ == "__main__":
-    program = sys.argv[0]
-    if len(sys.argv) < 3:
-        print(f"Usage: {program} <file1> <file2>")
-        print(f"ERROR: no files to compare ")
+def diff_subcommand(args):
+    if len(args) < 2:
+        print(f"Usage: {program} {subcommand} <file1> <file2>")
+        print(f"ERROR: no files to compare were provided for {subcommand} subcommand")
         exit(1)
-    lines1 = read_entire_file(sys.argv[1]).splitlines()
-    lines2 = read_entire_file(sys.argv[2]).splitlines()
+
+    file_path1, file_path2, *args = args
+    lines1 = read_entire_file(file_path1).splitlines()
+    lines2 = read_entire_file(file_path2).splitlines()
 
     m1 = len(lines1)
     m2 = len(lines2)
@@ -87,8 +88,32 @@ if __name__ == "__main__":
             assert False, "Unreachable"
     patch.reverse()
 
-    for p in patch:
-        print(p)
+    for (action, n, line) in patch:
+        print(f"{action} {n} {line}")
 
     # trace_tables(distances, actions)
 
+
+def usage(program):
+    print(f"Usage: {program} <SUBCOMMAND> [OPTIONS]")
+    print(f"Subcommands:")
+    print(f"    diff <file1> <file2>          print the difference between the files to stdout")
+    print(f"    patch <file1> <file2>         patch the file with the given patch")
+
+if __name__ == "__main__":
+    assert len(sys.argv) > 0
+    program, *args = sys.argv
+
+    if len(args) < 0:
+        usage(program)
+        print(f"ERROR: no subcommand is provided")
+        exit(1)
+
+    subcommand, *args = args
+
+    if subcommand == "diff":
+        diff_subcommand(args)
+    else:
+        usage(program)
+        print(f"ERROR: unknown subcommand {subcommand}")
+        exit(1)
