@@ -19,18 +19,9 @@ def trace_tables(cache, actions):
         print()
     print()
 
-def diff_subcommand(args):
-    if len(args) < 2:
-        print(f"Usage: {program} {subcommand} <file1> <file2>")
-        print(f"ERROR: no files to compare were provided for {subcommand} subcommand")
-        exit(1)
-
-    file_path1, file_path2, *args = args
-    lines1 = read_entire_file(file_path1).splitlines()
-    lines2 = read_entire_file(file_path2).splitlines()
-
-    m1 = len(lines1)
-    m2 = len(lines2)
+def edit_distance(s1, s2):
+    m1 = len(s1)
+    m2 = len(s2)
 
     distances = []
     actions = []
@@ -53,7 +44,7 @@ def diff_subcommand(args):
 
     for n1 in range(1, m1 + 1):
         for n2 in range(1, m2 + 1):
-            if lines1[n1 - 1] == lines2[n2 - 1]:
+            if s1[n1 - 1] == s2[n2 - 1]:
                 distances[n1][n2] = distances[n1 - 1][n2 - 1]
                 actions[n1][n2] = IGNORE
                 continue
@@ -77,10 +68,10 @@ def diff_subcommand(args):
         action = actions[n1][n2]
         if action == ADD:
             n2 -= 1
-            patch.append((ADD, n2, lines2[n2]))
+            patch.append((ADD, n2, s2[n2]))
         elif action == REMOVE:
             n1 -= 1
-            patch.append((REMOVE, n1, lines1[n1]))
+            patch.append((REMOVE, n1, s1[n1]))
         elif action == IGNORE:
             n1 -= 1
             n2 -= 1
@@ -88,11 +79,25 @@ def diff_subcommand(args):
             assert False, "Unreachable"
     patch.reverse()
 
+def diff_subcommand(args):
+    if len(args) < 2:
+        print(f"Usage: {program} {subcommand} <file1> <file2>")
+        print(f"ERROR: no files to compare were provided for {subcommand} subcommand")
+        exit(1)
+
+    file_path1, file_path2, *args = args
+    lines1 = read_entire_file(file_path1).splitlines()
+    lines2 = read_entire_file(file_path2).splitlines()
+
+    patch = edit_distance(lines1, lines2)
+
     for (action, n, line) in patch:
         print(f"{action} {n} {line}")
 
     # trace_tables(distances, actions)
 
+def patch_subcommand(args):
+    assert False, "Not implemented"
 
 def usage(program):
     print(f"Usage: {program} <SUBCOMMAND> [OPTIONS]")
@@ -113,6 +118,8 @@ if __name__ == "__main__":
 
     if subcommand == "diff":
         diff_subcommand(args)
+    elif subcommand == "patch":
+        patch_subcommand(args)
     else:
         usage(program)
         print(f"ERROR: unknown subcommand {subcommand}")
